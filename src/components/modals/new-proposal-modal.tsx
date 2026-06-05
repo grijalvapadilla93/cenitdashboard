@@ -17,10 +17,64 @@ interface Props {
   leadId?: string;
 }
 
+interface Template {
+  name: string;
+  fields: { title: string; description: string; scope: string; deliverables: string; timeline: string; pricing: string };
+}
+
+const templates: Template[] = [
+  {
+    name: "Web Development",
+    fields: {
+      title: "Web Development Proposal",
+      description: "A fully responsive, modern web application tailored to your business needs.",
+      scope: "Full-cycle development including UI/UX design, frontend and backend implementation, database setup, and deployment.",
+      deliverables: "Wireframes & prototypes, responsive frontend, REST API / backend, CMS integration, deployment & CI/CD pipeline.",
+      timeline: "8-12 weeks",
+      pricing: "25000",
+    },
+  },
+  {
+    name: "Mobile App",
+    fields: {
+      title: "Mobile Application Proposal",
+      description: "A cross-platform mobile application for iOS and Android.",
+      scope: "End-to-end mobile app development including design, development, testing, and app store submission.",
+      deliverables: "App UI/UX design, iOS & Android builds, backend API, admin dashboard, app store assets & submission.",
+      timeline: "12-16 weeks",
+      pricing: "35000",
+    },
+  },
+  {
+    name: "Branding & Design",
+    fields: {
+      title: "Brand Identity Proposal",
+      description: "Complete brand identity design to establish a strong market presence.",
+      scope: "Brand strategy, visual identity design, brand guidelines, and application to key collateral.",
+      deliverables: "Logo & variations, color palette, typography system, brand guidelines PDF, business card & stationery templates.",
+      timeline: "4-6 weeks",
+      pricing: "8000",
+    },
+  },
+  {
+    name: "Consulting",
+    fields: {
+      title: "Technology Consulting Proposal",
+      description: "Expert technology consulting to optimize your processes and infrastructure.",
+      scope: "Current state assessment, gap analysis, roadmap creation, and recommendations.",
+      deliverables: "Assessment report, technology roadmap, architecture recommendations, implementation plan.",
+      timeline: "2-4 weeks",
+      pricing: "5000",
+    },
+  },
+];
+
 export default function NewProposalModal({ open, onOpenChange, onSuccess, leadId }: Props) {
   const { leads, addLead, addProposal } = useStore();
   const [mode, setMode] = useState<"select" | "new-lead">("select");
   const [selectedLeadId, setSelectedLeadId] = useState(leadId || "");
+  const [creationMode, setCreationMode] = useState<"scratch" | "template">("scratch");
+  const [selectedTemplate, setSelectedTemplate] = useState("");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [scope, setScope] = useState("");
@@ -37,11 +91,25 @@ export default function NewProposalModal({ open, onOpenChange, onSuccess, leadId
     if (leadId) {
       setSelectedLeadId(leadId);
       const lead = leads.find((l) => l.id === leadId);
-      if (lead) {
+      if (lead && creationMode === "scratch") {
         setTitle(`Proposal for ${lead.businessName}`);
       }
     }
-  }, [leadId, leads, open]);
+  }, [leadId, leads, open, creationMode]);
+
+  useEffect(() => {
+    if (creationMode === "template" && selectedTemplate) {
+      const tmpl = templates.find((t) => t.name === selectedTemplate);
+      if (tmpl) {
+        setTitle(tmpl.fields.title);
+        setDescription(tmpl.fields.description);
+        setScope(tmpl.fields.scope);
+        setDeliverables(tmpl.fields.deliverables);
+        setTimeline(tmpl.fields.timeline);
+        setPricing(tmpl.fields.pricing);
+      }
+    }
+  }, [selectedTemplate, creationMode]);
 
   const selectedLead = leads.find((l) => l.id === selectedLeadId);
 
@@ -73,7 +141,7 @@ export default function NewProposalModal({ open, onOpenChange, onSuccess, leadId
       notes,
     });
     setSelectedLeadId(""); setTitle(""); setDescription(""); setScope(""); setDeliverables(""); setTimeline(""); setPricing(""); setNotes("");
-    setNewBusiness(""); setNewEmail(""); setNewPhone("");
+    setNewBusiness(""); setNewEmail(""); setNewPhone(""); setSelectedTemplate("");
     onOpenChange(false);
     onSuccess?.();
   };
@@ -87,6 +155,12 @@ export default function NewProposalModal({ open, onOpenChange, onSuccess, leadId
           <DialogTitle className="text-headline-md font-headline-md">New Proposal</DialogTitle>
           <DialogDescription>Create a proposal for a lead.</DialogDescription>
         </DialogHeader>
+
+        <div className="flex gap-2 mb-2">
+          <Button type="button" variant={creationMode === "scratch" ? "default" : "outline"} onClick={() => setCreationMode("scratch")} className={`rounded-full ${creationMode === "scratch" ? "bg-primary text-on-primary" : ""}`}>From Scratch</Button>
+          <Button type="button" variant={creationMode === "template" ? "default" : "outline"} onClick={() => setCreationMode("template")} className={`rounded-full ${creationMode === "template" ? "bg-primary text-on-primary" : ""}`}>Template</Button>
+        </div>
+
         {!leadId && hasLeads && (
           <div className="flex gap-2 mb-2">
             <Button type="button" variant={mode === "select" ? "default" : "outline"} onClick={() => setMode("select")} className={`rounded-full ${mode === "select" ? "bg-primary text-on-primary" : ""}`}>Existing Lead</Button>
@@ -106,6 +180,21 @@ export default function NewProposalModal({ open, onOpenChange, onSuccess, leadId
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-5">
+            {creationMode === "template" && (
+              <div className="space-y-2">
+                <Label className="text-label-sm font-label-sm text-primary">Choose Template</Label>
+                <Select value={selectedTemplate} onValueChange={(v) => setSelectedTemplate(v || "")}>
+                  <SelectTrigger className="h-12 rounded-xl bg-surface-container-low border-transparent">
+                    <SelectValue placeholder="Select a template..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {templates.map((t) => (
+                      <SelectItem key={t.name} value={t.name}>{t.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
             {!leadId && mode === "select" ? (
               <div className="space-y-2">
                 <Label className="text-label-sm font-label-sm text-primary">Select Lead</Label>

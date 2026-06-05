@@ -34,6 +34,7 @@ function LeadDetail(props: { params: Promise<{ id: string }> }) {
   const [editFields, setEditFields] = useState({ businessName: "", email: "", phone: "", source: "", website: "", notes: "" });
   const [pricingItems, setPricingItems] = useState<{ label: string; amount: number }[]>([]);
   const [showStageMenu, setShowStageMenu] = useState(false);
+  const [openStep, setOpenStep] = useState<number | null>(null);
 
   const startEditing = useCallback(() => {
     if (!lead) return;
@@ -357,6 +358,34 @@ function LeadDetail(props: { params: Promise<{ id: string }> }) {
                     <div className={`absolute w-4 h-4 ${step.done ? "bg-primary" : "bg-surface-container"} rounded-full -left-[9px] top-1 border-2 border-surface-container-lowest`}></div>
                     <h4 className="text-label-md font-label-md text-primary mb-1">{step.label}</h4>
                     {step.date && <p className="text-label-sm font-label-sm text-on-surface-variant">{step.date}</p>}
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            <section className="bg-surface-container-lowest border border-surface-container-high rounded-[32px] p-8 shadow-[0_10px_30px_rgba(0,0,0,0.04)]">
+              <h2 className="text-headline-md font-headline-md text-primary mb-6 flex items-center gap-2">
+                <span className="material-symbols-outlined">call</span>
+                Call Flow Guide
+              </h2>
+              <div className="space-y-3">
+                {[
+                  { title: "1. Introduction & Rapport", text: "Greet warmly, introduce yourself and your company. Ask how their day is going. Establish a friendly tone before jumping into business." },
+                  { title: "2. Discovery & Needs", text: "Ask open-ended questions about their business challenges. What triggered their interest? What solutions have they tried? Listen more than you talk." },
+                  { title: "3. Present Solution", text: "Summarize their pain points back to them. Briefly explain how your service solves their specific problem. Focus on value, not features." },
+                  { title: "4. Handle Objections", text: "Listen to concerns without interrupting. Acknowledge their hesitation. Address budget, timing, or trust objections with case studies and guarantees." },
+                  { title: "5. Close & Next Steps", text: "Ask for the next commitment (call, meeting, proposal review). Set clear expectations. Send a follow-up email summarizing the conversation within 2 hours." },
+                ].map((step, i) => (
+                  <div key={step.title} className="border border-surface-container rounded-2xl overflow-hidden">
+                    <button onClick={() => setOpenStep(openStep === i ? null : i)} className="w-full flex items-center justify-between p-4 text-left cursor-pointer hover:bg-surface-container-low transition-colors">
+                      <span className="text-label-sm font-label-sm text-primary font-semibold">{step.title}</span>
+                      <span className={`material-symbols-outlined text-secondary transition-transform ${openStep === i ? "rotate-180" : ""}`}>expand_more</span>
+                    </button>
+                    {openStep === i && (
+                      <div className="px-4 pb-4">
+                        <p className="text-body-md font-body-md text-on-surface-variant text-sm leading-relaxed">{step.text}</p>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>

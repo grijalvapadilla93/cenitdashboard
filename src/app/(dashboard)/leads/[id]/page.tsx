@@ -365,15 +365,21 @@ function LeadDetail(props: { params: Promise<{ id: string }> }) {
               </h2>
               <div className="relative border-l-2 border-surface-container ml-3 space-y-8 pb-4">
                 {[
-                  { label: "Lead Created", done: true, date: lead.createdAt },
-                  { label: "Contact & Qualify", done: lead.stage !== "new", date: lead.stage === "reached" ? "Contacted" : "" },
-                  { label: "Proposal Sent", done: !!proposal, date: proposal?.createdAt },
-                  { label: "Closed Won", done: lead.stage === "won" || lead.stage === "lost", date: lead.stage === "won" ? "Won" : lead.stage === "lost" ? "Lost" : "" },
+                  { label: "Lead Created", done: true, date: lead.createdAt, action: null },
+                  { label: "Contact & Qualify", done: lead.stage !== "new", date: lead.stage === "reached" ? "Contacted" : "", action: () => updateLeadStage(lead.id, "reached") },
+                  { label: "Proposal Sent", done: !!proposal, date: proposal?.createdAt, action: () => router.push(`/leads/${lead.id}?add-proposal=true`) },
+                  { label: "Closed Won", done: lead.stage === "won" || lead.stage === "lost", date: lead.stage === "won" ? "Won" : lead.stage === "lost" ? "Lost" : "", action: lead.stage === "won" || lead.stage === "lost" ? null : () => updateLeadStage(lead.id, "won") },
                 ].map((step, i) => (
                   <div key={i} className="relative pl-6" style={{ opacity: step.done ? 1 : 0.5 }}>
                     <div className={`absolute w-4 h-4 ${step.done ? "bg-primary" : "bg-surface-container"} rounded-full -left-[9px] top-1 border-2 border-surface-container-lowest`}></div>
                     <h4 className="text-label-md font-label-md text-primary mb-1">{step.label}</h4>
-                    {step.date && <p className="text-label-sm font-label-sm text-on-surface-variant">{step.date}</p>}
+                    {step.date && <p className="text-label-sm font-label-sm text-on-surface-variant mb-2">{step.date}</p>}
+                    {!step.done && step.action && (
+                      <button onClick={step.action} className="text-label-sm font-label-sm text-primary bg-primary/10 px-4 py-1.5 rounded-full hover:bg-primary/20 transition-colors cursor-pointer flex items-center gap-1">
+                        <span className="material-symbols-outlined text-[14px]">check</span>
+                        Mark Complete
+                      </button>
+                    )}
                   </div>
                 ))}
               </div>

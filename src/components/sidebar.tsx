@@ -13,7 +13,6 @@ const navItems = [
 ];
 
 const bottomItems = [
-  { href: "#", label: "Support", icon: "help" },
   { href: "#", label: "Archive", icon: "archive" },
 ];
 

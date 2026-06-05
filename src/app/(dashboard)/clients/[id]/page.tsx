@@ -8,12 +8,13 @@ import { useStore } from "@/lib/store";
 import CreateContractModal from "@/components/modals/create-contract-modal";
 import SendDocumentModal from "@/components/modals/send-document-modal";
 import NewProjectModal from "@/components/modals/new-project-modal";
+import { ConfirmDialog } from "@/components/confirm-dialog";
 
 function ClientDetail(props: { params: Promise<{ id: string }> }) {
   const params = use(props.params);
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { clients, documents, projects, updateClient, updateDocument, deleteDocument, addDocument } = useStore();
+  const { clients, documents, projects, updateClient, updateDocument, deleteDocument, deleteClient, deleteProject, addDocument } = useStore();
   const client = clients.find((c) => c.id === params.id);
   const clientDocs = documents.filter((d) => d.clientId === params.id);
   const clientProjects = projects.filter((p) => p.entityId === params.id && p.entityType === "client");
@@ -27,6 +28,9 @@ function ClientDetail(props: { params: Promise<{ id: string }> }) {
   const [viewDoc, setViewDoc] = useState<typeof clientDocs[0] | null>(null);
   const [editDoc, setEditDoc] = useState<typeof clientDocs[0] | null>(null);
   const [editDocContent, setEditDocContent] = useState("");
+  const [confirmDeleteClient, setConfirmDeleteClient] = useState(false);
+  const [confirmDeleteDoc, setConfirmDeleteDoc] = useState<string | null>(null);
+  const [deleteProjectId, setDeleteProjectId] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const startEditing = useCallback(() => {
@@ -158,6 +162,10 @@ function ClientDetail(props: { params: Promise<{ id: string }> }) {
                 <button onClick={() => router.push(`/clients/${client.id}?create-contract=true`)} className="px-6 py-3 rounded-full bg-primary text-on-primary text-label-md font-label-md hover:bg-surface-tint transition-colors cursor-pointer">
                   Create Contract
                 </button>
+                <button onClick={() => setConfirmDeleteClient(true)} className="px-6 py-3 rounded-full border-2 border-error/30 text-error text-label-md font-label-md hover:bg-error/5 transition-colors cursor-pointer flex items-center gap-2">
+                  <span className="material-symbols-outlined text-[18px]">delete</span>
+                  Delete
+                </button>
               </>
             )}
           </div>
@@ -270,7 +278,16 @@ function ClientDetail(props: { params: Promise<{ id: string }> }) {
                         <span>Assigned to {proj.assignees.map((a) => ({ alex: "Alex", diego: "Diego", pablo: "Pablo" })[a]).join(", ")}</span>
                       </div>
                       {proj.notes && <p className="text-body-md font-body-md text-on-surface-variant text-sm mt-2">{proj.notes}</p>}
-                      <p className="text-label-sm font-label-sm text-secondary mt-2">Created {proj.createdAt}</p>
+                      <div className="flex items-center justify-between mt-2">
+                        <p className="text-label-sm font-label-sm text-secondary">Created {proj.createdAt}</p>
+                        <button
+                          onClick={() => setDeleteProjectId(proj.id)}
+                          className="text-error hover:bg-error/5 p-1 rounded-full transition-colors cursor-pointer"
+                          title="Delete project"
+                        >
+                          <span className="material-symbols-outlined text-[18px]">delete</span>
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -333,7 +350,7 @@ function ClientDetail(props: { params: Promise<{ id: string }> }) {
                         <span className="material-symbols-outlined">send</span>
                       </button>
                       <button
-                        onClick={() => { if (confirm("Delete this document?")) deleteDocument(doc.id); }}
+                        onClick={() => setConfirmDeleteDoc(doc.id)}
                         className={`p-2 rounded-full transition-colors cursor-pointer ${doc.type === "contract" ? "bg-on-primary/10 hover:bg-on-primary/20 text-on-primary" : "bg-surface-container-high hover:bg-surface-container-highest text-primary"}`}
                         title="Delete"
                       >
@@ -434,6 +451,33 @@ function ClientDetail(props: { params: Promise<{ id: string }> }) {
           </div>
         </div>
       )}
+
+      <ConfirmDialog
+        open={confirmDeleteClient}
+        onOpenChange={setConfirmDeleteClient}
+        title="Delete Client"
+        description={`Are you sure you want to delete "${client.businessName}"? This action cannot be undone.`}
+        confirmLabel="Delete"
+        onConfirm={() => { deleteClient(client.id); router.push("/clients"); }}
+      />
+
+      <ConfirmDialog
+        open={confirmDeleteDoc !== null}
+        onOpenChange={(o) => { if (!o) setConfirmDeleteDoc(null); }}
+        title="Delete Document"
+        description="Are you sure you want to delete this document? This action cannot be undone."
+        confirmLabel="Delete"
+        onConfirm={() => { if (confirmDeleteDoc) deleteDocument(confirmDeleteDoc); setConfirmDeleteDoc(null); }}
+      />
+
+      <ConfirmDialog
+        open={deleteProjectId !== null}
+        onOpenChange={(o) => { if (!o) setDeleteProjectId(null); }}
+        title="Delete Project"
+        description="Are you sure you want to delete this project? This action cannot be undone."
+        confirmLabel="Delete"
+        onConfirm={() => { if (deleteProjectId) deleteProject(deleteProjectId); setDeleteProjectId(null); }}
+      />
     </>
   );
 }

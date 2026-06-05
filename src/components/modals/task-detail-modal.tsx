@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useStore, type Task, type Assignee, assigneeLabel } from "@/lib/store";
+import { ConfirmDialog } from "@/components/confirm-dialog";
 
 interface Props {
   task: Task | null;
@@ -23,6 +24,8 @@ export default function TaskDetailModal({ task, open, onOpenChange }: Props) {
   const { pickUpTask, completeTask, returnToAvailable } = useStore();
   const [completedNotes, setCompletedNotes] = useState("");
   const [returnNotes, setReturnNotes] = useState("");
+  const [confirmComplete, setConfirmComplete] = useState(false);
+  const [confirmReturn, setConfirmReturn] = useState(false);
 
   if (!task) return null;
 
@@ -125,7 +128,7 @@ export default function TaskDetailModal({ task, open, onOpenChange }: Props) {
           {!isAvailable && !isCompleted && (
             <div className="space-y-4 border-t border-surface-container pt-4">
               <div className="space-y-2">
-                <Button onClick={handleReturnToAvailable} disabled={!returnNotes.trim()} className="w-full rounded-full bg-surface-container-high text-on-surface">
+                <Button onClick={() => setConfirmReturn(true)} disabled={!returnNotes.trim()} className="w-full rounded-full bg-surface-container-high text-on-surface">
                   <span className="material-symbols-outlined text-[18px]">undo</span>
                   Return to Available
                 </Button>
@@ -134,7 +137,7 @@ export default function TaskDetailModal({ task, open, onOpenChange }: Props) {
               <div className="border-t border-surface-container pt-4">
                 <Label className="text-label-sm font-label-sm text-primary">Complete Task</Label>
                 <Textarea value={completedNotes} onChange={(e) => setCompletedNotes(e.target.value)} placeholder="Completion notes..." rows={2} className="mt-2 rounded-xl bg-surface-container-low border-transparent" />
-                <Button onClick={handleComplete} disabled={!completedNotes.trim()} className="w-full rounded-full bg-primary text-on-primary mt-2">
+                <Button onClick={() => setConfirmComplete(true)} disabled={!completedNotes.trim()} className="w-full rounded-full bg-primary text-on-primary mt-2">
                   Mark as Complete
                 </Button>
               </div>
@@ -148,6 +151,24 @@ export default function TaskDetailModal({ task, open, onOpenChange }: Props) {
           </div>
         </div>
       </DialogContent>
+
+      <ConfirmDialog
+        open={confirmComplete}
+        onOpenChange={setConfirmComplete}
+        title="Complete Task"
+        description={`Are you sure you want to mark "${task.name}" as complete?`}
+        confirmLabel="Complete"
+        onConfirm={handleComplete}
+      />
+
+      <ConfirmDialog
+        open={confirmReturn}
+        onOpenChange={setConfirmReturn}
+        title="Return to Available"
+        description="Are you sure you want to return this task to available? It will be unassigned."
+        confirmLabel="Return"
+        onConfirm={handleReturnToAvailable}
+      />
     </Dialog>
   );
 }

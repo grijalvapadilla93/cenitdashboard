@@ -8,6 +8,7 @@ import { useStore } from "@/lib/store";
 import NewProposalModal from "@/components/modals/new-proposal-modal";
 import NewClientModal from "@/components/modals/new-client-modal";
 import NewProjectModal from "@/components/modals/new-project-modal";
+import { ConfirmDialog } from "@/components/confirm-dialog";
 
 const STAGES = [
   { key: "new", label: "New" },
@@ -21,7 +22,7 @@ function LeadDetail(props: { params: Promise<{ id: string }> }) {
   const params = use(props.params);
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { leads, proposals, projects, updateLeadStage, updateLead, updateProposalPricing } = useStore();
+  const { leads, proposals, projects, deleteLead, deleteProject, updateLeadStage, updateLead, updateProposalPricing } = useStore();
   const lead = leads.find((l) => l.id === params.id);
   const proposal = proposals.find((p) => p.leadId === params.id);
   const leadProjects = projects.filter((p) => p.entityId === params.id && p.entityType === "lead");
@@ -35,6 +36,9 @@ function LeadDetail(props: { params: Promise<{ id: string }> }) {
   const [pricingItems, setPricingItems] = useState<{ label: string; amount: number }[]>([]);
   const [showStageMenu, setShowStageMenu] = useState(false);
   const [openStep, setOpenStep] = useState<number | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [confirmConvert, setConfirmConvert] = useState(false);
+  const [deleteProjectId, setDeleteProjectId] = useState<string | null>(null);
 
   const startEditing = useCallback(() => {
     if (!lead) return;
@@ -194,8 +198,11 @@ function LeadDetail(props: { params: Promise<{ id: string }> }) {
                 <span className="material-symbols-outlined text-[18px]">add</span>
                 New Project
               </button>
-              <button onClick={() => router.push(`/leads/${lead.id}?convert-client=true`)} className="bg-primary text-on-primary text-label-md font-label-md px-6 py-2.5 rounded-full hover:bg-primary-container transition-colors active:scale-95 cursor-pointer">
+              <button onClick={() => setConfirmConvert(true)} className="bg-primary text-on-primary text-label-md font-label-md px-6 py-2.5 rounded-full hover:bg-primary-container transition-colors active:scale-95 cursor-pointer">
                 Convert to Client
+              </button>
+              <button onClick={() => setConfirmDelete(true)} className="border-2 border-error/30 text-error text-label-md font-label-md px-6 py-2.5 rounded-full hover:bg-error/5 transition-colors active:scale-95 cursor-pointer">
+                <span className="material-symbols-outlined text-[18px]">delete</span>
               </button>
             </div>
           </div>
@@ -333,7 +340,16 @@ function LeadDetail(props: { params: Promise<{ id: string }> }) {
                         <span>Assigned to {proj.assignees.map((a) => ({ alex: "Alex", diego: "Diego", pablo: "Pablo" })[a]).join(", ")}</span>
                       </div>
                       {proj.notes && <p className="text-body-md font-body-md text-on-surface-variant text-sm mt-2">{proj.notes}</p>}
-                      <p className="text-label-sm font-label-sm text-secondary mt-2">Created {proj.createdAt}</p>
+                      <div className="flex items-center justify-between mt-2">
+                        <p className="text-label-sm font-label-sm text-secondary">Created {proj.createdAt}</p>
+                        <button
+                          onClick={() => setDeleteProjectId(proj.id)}
+                          className="text-error hover:bg-error/5 p-1 rounded-full transition-colors cursor-pointer"
+                          title="Delete project"
+                        >
+                          <span className="material-symbols-outlined text-[18px]">delete</span>
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -430,6 +446,33 @@ function LeadDetail(props: { params: Promise<{ id: string }> }) {
           </div>
         </div>
       </div>
+
+      <ConfirmDialog
+        open={confirmDelete}
+        onOpenChange={setConfirmDelete}
+        title="Delete Lead"
+        description={`Are you sure you want to delete "${lead.businessName}"? This action cannot be undone.`}
+        confirmLabel="Delete"
+        onConfirm={() => { deleteLead(lead.id); router.push("/leads"); }}
+      />
+
+      <ConfirmDialog
+        open={confirmConvert}
+        onOpenChange={setConfirmConvert}
+        title="Convert to Client"
+        description={`Are you sure you want to convert "${lead.businessName}" to a client?`}
+        confirmLabel="Convert"
+        onConfirm={() => router.push(`/leads/${lead.id}?convert-client=true`)}
+      />
+
+      <ConfirmDialog
+        open={deleteProjectId !== null}
+        onOpenChange={(o) => { if (!o) setDeleteProjectId(null); }}
+        title="Delete Project"
+        description="Are you sure you want to delete this project? This action cannot be undone."
+        confirmLabel="Delete"
+        onConfirm={() => { if (deleteProjectId) deleteProject(deleteProjectId); setDeleteProjectId(null); }}
+      />
     </>
   );
 }

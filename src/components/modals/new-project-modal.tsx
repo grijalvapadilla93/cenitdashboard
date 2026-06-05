@@ -46,9 +46,14 @@ export default function NewProjectModal({ open, onOpenChange, onSuccess, preSele
     e.preventDefault();
     if (!entityId || !name.trim()) return;
 
+    const entityName = entityType === "lead"
+      ? leads.find((l) => l.id === entityId)?.businessName || ""
+      : clients.find((c) => c.id === entityId)?.businessName || "";
+
     addProject({
       entityId,
       entityType,
+      entityName,
       name,
       pricing: Number(pricing) || 0,
       dueDate,

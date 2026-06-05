@@ -1,7 +1,30 @@
 "use client";
 
 import Sidebar from "@/components/sidebar";
-import { AppProvider } from "@/lib/store";
+import { AppProvider, useStore } from "@/lib/store";
+
+function ToastContainer() {
+  const { toasts, removeToast } = useStore();
+  if (toasts.length === 0) return null;
+  return (
+    <div className="fixed bottom-6 right-6 z-[100] flex flex-col gap-3 max-w-sm">
+      {toasts.map((t) => (
+        <div
+          key={t.id}
+          onClick={() => removeToast(t.id)}
+          className={`cursor-pointer px-5 py-3 rounded-2xl shadow-lg text-label-sm font-label-sm text-white animate-[slideIn_0.3s_ease] flex items-center gap-3 ${
+            t.type === "success" ? "bg-primary" : t.type === "error" ? "bg-red-600" : "bg-surface-container-high text-on-surface"
+          }`}
+        >
+          <span className="material-symbols-outlined text-[18px]">
+            {t.type === "success" ? "check_circle" : t.type === "error" ? "error" : "info"}
+          </span>
+          {t.message}
+        </div>
+      ))}
+    </div>
+  );
+}
 
 export default function DashboardLayout({
   children,
@@ -18,22 +41,8 @@ export default function DashboardLayout({
               <button className="md:hidden p-2 rounded-full hover:bg-surface-container-low text-secondary transition-colors cursor-pointer active:scale-95">
                 <span className="material-symbols-outlined">menu</span>
               </button>
-              <div className="relative hidden sm:block">
-                <span className="material-symbols-outlined absolute left-3 top-1/2 transform -translate-y-1/2 text-secondary">search</span>
-                <input
-                  className="pl-10 pr-4 py-2 bg-surface-container-low border-none rounded-full text-body-md font-body-md focus:ring-1 focus:ring-primary w-64 h-12 transition-all"
-                  placeholder="Search..."
-                  type="text"
-                />
-              </div>
             </div>
             <div className="flex items-center gap-4">
-              <button className="p-2 rounded-full hover:bg-surface-container-low text-secondary transition-colors cursor-pointer active:scale-95">
-                <span className="material-symbols-outlined">notifications</span>
-              </button>
-              <button className="p-2 rounded-full hover:bg-surface-container-low text-secondary transition-colors cursor-pointer active:scale-95">
-                <span className="material-symbols-outlined">settings</span>
-              </button>
               <div className="w-10 h-10 rounded-full bg-surface-variant overflow-hidden cursor-pointer hover:opacity-80 transition-opacity ml-2 border-2 border-surface-container-lowest shadow-sm">
                 <div className="w-full h-full bg-primary flex items-center justify-center text-on-primary text-sm font-bold">AJ</div>
               </div>
@@ -44,6 +53,7 @@ export default function DashboardLayout({
           </div>
         </main>
       </div>
+      <ToastContainer />
     </AppProvider>
   );
 }

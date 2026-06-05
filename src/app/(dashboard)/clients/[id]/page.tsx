@@ -8,13 +8,14 @@ import { useStore } from "@/lib/store";
 import CreateContractModal from "@/components/modals/create-contract-modal";
 import SendDocumentModal from "@/components/modals/send-document-modal";
 import NewProjectModal from "@/components/modals/new-project-modal";
+import NewInvoiceModal from "@/components/modals/new-invoice-modal";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 
 function ClientDetail(props: { params: Promise<{ id: string }> }) {
   const params = use(props.params);
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { clients, documents, projects, updateClient, updateDocument, deleteDocument, deleteClient, deleteProject, addDocument } = useStore();
+  const { clients, documents, projects, updateClient, updateDocument, deleteDocument, deleteClient, deleteProject, addDocument, addActivity, addToast } = useStore();
   const client = clients.find((c) => c.id === params.id);
   const clientDocs = documents.filter((d) => d.clientId === params.id);
   const clientProjects = projects.filter((p) => p.entityId === params.id && p.entityType === "client");
@@ -31,6 +32,9 @@ function ClientDetail(props: { params: Promise<{ id: string }> }) {
   const [confirmDeleteClient, setConfirmDeleteClient] = useState(false);
   const [confirmDeleteDoc, setConfirmDeleteDoc] = useState<string | null>(null);
   const [deleteProjectId, setDeleteProjectId] = useState<string | null>(null);
+  const [showInvoice, setShowInvoice] = useState(false);
+  const [showReminder, setShowReminder] = useState(false);
+  const [reminderNote, setReminderNote] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
 
   const startEditing = useCallback(() => {
@@ -132,6 +136,28 @@ function ClientDetail(props: { params: Promise<{ id: string }> }) {
         preSelectedType="client"
         preSelectedId={client.id}
       />
+      <NewInvoiceModal
+        open={showInvoice}
+        onOpenChange={setShowInvoice}
+      />
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ display: showReminder ? "flex" : "none" }}>
+        <div className="fixed inset-0 bg-black/40" onClick={() => setShowReminder(false)} />
+        <div className="bg-surface-bright rounded-3xl w-full max-w-md p-6 z-10 shadow-xl">
+          <h3 className="text-headline-md font-headline-md text-primary mb-2">Send Reminder</h3>
+          <p className="text-label-sm font-label-sm text-secondary mb-4">Send a payment reminder to {client.businessName}</p>
+          <textarea
+            value={reminderNote}
+            onChange={(e) => setReminderNote(e.target.value)}
+            placeholder="Reminder note..."
+            rows={3}
+            className="w-full p-3 rounded-xl bg-surface-container-low border border-surface-variant text-body-md font-body-md text-primary mb-4"
+          />
+          <div className="flex justify-end gap-3">
+            <button onClick={() => { setShowReminder(false); setReminderNote(""); }} className="px-5 py-2.5 rounded-full border-2 border-surface-container-highest text-label-sm font-label-sm text-primary hover:bg-surface-container-low transition-colors cursor-pointer">Cancel</button>
+            <button onClick={() => { setShowReminder(false); addActivity("Sent reminder", "client", client.businessName); addToast(`Reminder sent to ${client.businessName}`); setReminderNote(""); }} disabled={!reminderNote.trim()} className="px-5 py-2.5 rounded-full bg-primary text-on-primary text-label-sm font-label-sm hover:bg-primary-container transition-colors cursor-pointer disabled:opacity-50">Send Reminder</button>
+          </div>
+        </div>
+      </div>
 
       <div className="w-full space-y-8 pt-8">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
@@ -144,25 +170,33 @@ function ClientDetail(props: { params: Promise<{ id: string }> }) {
             </div>
             <h2 className="text-display font-display text-primary">{client.businessName}</h2>
           </div>
-          <div className="flex gap-3">
+          <div className="flex flex-wrap gap-2">
             {editing ? (
               <>
-                <button onClick={startEditing} className="px-6 py-3 rounded-full bg-primary text-on-primary text-label-md font-label-md hover:bg-primary-container transition-colors cursor-pointer">Save</button>
-                <button onClick={() => setEditing(false)} className="px-6 py-3 rounded-full border-2 border-surface-container-highest text-label-md font-label-md text-primary hover:bg-surface-container-low transition-colors cursor-pointer">Cancel</button>
+                <button onClick={startEditing} className="px-5 py-2.5 rounded-full bg-primary text-on-primary text-label-md font-label-md hover:bg-primary-container transition-colors cursor-pointer">Save</button>
+                <button onClick={() => setEditing(false)} className="px-5 py-2.5 rounded-full border-2 border-surface-container-highest text-label-md font-label-md text-primary hover:bg-surface-container-low transition-colors cursor-pointer">Cancel</button>
               </>
             ) : (
               <>
-                <button onClick={startEditing} className="px-6 py-3 rounded-full border-2 border-surface-container-highest text-label-md font-label-md text-primary hover:bg-surface-container-low transition-colors cursor-pointer">
+                <button onClick={startEditing} className="px-5 py-2.5 rounded-full border-2 border-surface-container-highest text-label-md font-label-md text-primary hover:bg-surface-container-low transition-colors cursor-pointer">
                   Edit Profile
                 </button>
-                <button onClick={() => setShowNewProject(true)} className="px-6 py-3 rounded-full border-2 border-surface-container-highest text-label-md font-label-md text-primary hover:bg-surface-container-low transition-colors cursor-pointer flex items-center gap-2">
+                <button onClick={() => setShowNewProject(true)} className="px-5 py-2.5 rounded-full border-2 border-surface-container-highest text-label-md font-label-md text-primary hover:bg-surface-container-low transition-colors cursor-pointer flex items-center gap-1 text-nowrap">
                   <span className="material-symbols-outlined text-[18px]">add</span>
                   New Project
                 </button>
-                <button onClick={() => router.push(`/clients/${client.id}?create-contract=true`)} className="px-6 py-3 rounded-full bg-primary text-on-primary text-label-md font-label-md hover:bg-surface-tint transition-colors cursor-pointer">
+                <button onClick={() => router.push(`/clients/${client.id}?create-contract=true`)} className="px-5 py-2.5 rounded-full bg-primary text-on-primary text-label-md font-label-md hover:bg-surface-tint transition-colors cursor-pointer text-nowrap">
                   Create Contract
                 </button>
-                <button onClick={() => setConfirmDeleteClient(true)} className="px-6 py-3 rounded-full border-2 border-error/30 text-error text-label-md font-label-md hover:bg-error/5 transition-colors cursor-pointer flex items-center gap-2">
+                <button onClick={() => setShowInvoice(true)} className="px-5 py-2.5 rounded-full border-2 border-surface-container-highest text-label-md font-label-md text-primary hover:bg-surface-container-low transition-colors cursor-pointer flex items-center gap-1 text-nowrap">
+                  <span className="material-symbols-outlined text-[18px]">receipt</span>
+                  Send Invoice
+                </button>
+                <button onClick={() => setShowReminder(true)} className="px-5 py-2.5 rounded-full border-2 border-surface-container-highest text-label-md font-label-md text-primary hover:bg-surface-container-low transition-colors cursor-pointer flex items-center gap-1 text-nowrap">
+                  <span className="material-symbols-outlined text-[18px]">notifications_active</span>
+                  Send Reminder
+                </button>
+                <button onClick={() => setConfirmDeleteClient(true)} className="px-5 py-2.5 rounded-full border-2 border-error/30 text-error text-label-md font-label-md hover:bg-error/5 transition-colors cursor-pointer flex items-center gap-1">
                   <span className="material-symbols-outlined text-[18px]">delete</span>
                   Delete
                 </button>

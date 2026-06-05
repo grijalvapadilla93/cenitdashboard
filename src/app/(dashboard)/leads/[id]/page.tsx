@@ -179,29 +179,29 @@ function LeadDetail(props: { params: Promise<{ id: string }> }) {
                 </div>
               </div>
             </div>
-            <div className="flex gap-3">
+            <div className="flex flex-wrap gap-2">
               {editing ? (
                 <>
-                  <button onClick={saveEditing} className="bg-primary text-on-primary text-label-md font-label-md px-6 py-2.5 rounded-full hover:bg-primary-container transition-colors active:scale-95 cursor-pointer">Save</button>
-                  <button onClick={() => setEditing(false)} className="border-2 border-surface-container-highest text-primary text-label-md font-label-md px-6 py-2.5 rounded-full hover:bg-surface-container-low transition-colors active:scale-95 cursor-pointer">Cancel</button>
+                  <button onClick={saveEditing} className="bg-primary text-on-primary text-label-md font-label-md px-5 py-2.5 rounded-full hover:bg-primary-container transition-colors active:scale-95 cursor-pointer">Save</button>
+                  <button onClick={() => setEditing(false)} className="border-2 border-surface-container-highest text-primary text-label-md font-label-md px-5 py-2.5 rounded-full hover:bg-surface-container-low transition-colors active:scale-95 cursor-pointer">Cancel</button>
                 </>
               ) : (
-                <button onClick={startEditing} className="border-2 border-surface-container-highest text-primary text-label-md font-label-md px-6 py-2.5 rounded-full hover:bg-surface-container-low transition-colors active:scale-95 cursor-pointer">
+                <button onClick={startEditing} className="border-2 border-surface-container-highest text-primary text-label-md font-label-md px-5 py-2.5 rounded-full hover:bg-surface-container-low transition-colors active:scale-95 cursor-pointer">
                   Edit Details
                 </button>
               )}
-              <button onClick={() => router.push(`/leads/${lead.id}?add-proposal=true`)} className="border-2 border-surface-container-highest text-primary text-label-md font-label-md px-6 py-2.5 rounded-full hover:bg-surface-container-low transition-colors active:scale-95 flex items-center gap-2 cursor-pointer">
+              <button onClick={() => router.push(`/leads/${lead.id}?add-proposal=true`)} className="border-2 border-surface-container-highest text-primary text-label-md font-label-md px-5 py-2.5 rounded-full hover:bg-surface-container-low transition-colors active:scale-95 flex items-center gap-1 cursor-pointer text-nowrap">
                 <span className="material-symbols-outlined text-[18px]">add</span>
                 Add Proposal
               </button>
-              <button onClick={() => setShowNewProject(true)} className="border-2 border-surface-container-highest text-primary text-label-md font-label-md px-6 py-2.5 rounded-full hover:bg-surface-container-low transition-colors active:scale-95 flex items-center gap-2 cursor-pointer">
+              <button onClick={() => setShowNewProject(true)} className="border-2 border-surface-container-highest text-primary text-label-md font-label-md px-5 py-2.5 rounded-full hover:bg-surface-container-low transition-colors active:scale-95 flex items-center gap-1 cursor-pointer text-nowrap">
                 <span className="material-symbols-outlined text-[18px]">add</span>
                 New Project
               </button>
-              <button onClick={() => setConfirmConvert(true)} className="bg-primary text-on-primary text-label-md font-label-md px-6 py-2.5 rounded-full hover:bg-primary-container transition-colors active:scale-95 cursor-pointer">
+              <button onClick={() => setConfirmConvert(true)} className="bg-primary text-on-primary text-label-md font-label-md px-5 py-2.5 rounded-full hover:bg-primary-container transition-colors active:scale-95 cursor-pointer text-nowrap">
                 Convert to Client
               </button>
-              <button onClick={() => setConfirmDelete(true)} className="border-2 border-error/30 text-error text-label-md font-label-md px-6 py-2.5 rounded-full hover:bg-error/5 transition-colors active:scale-95 cursor-pointer">
+              <button onClick={() => setConfirmDelete(true)} className="border-2 border-error/30 text-error text-label-md font-label-md px-5 py-2.5 rounded-full hover:bg-error/5 transition-colors active:scale-95 cursor-pointer">
                 <span className="material-symbols-outlined text-[18px]">delete</span>
               </button>
             </div>

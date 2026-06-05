@@ -129,7 +129,7 @@ export default function NewProjectModal({ open, onOpenChange, onSuccess, preSele
                 ) : (
                   <Select value={entityId} onValueChange={(v) => setEntityId(v || "")}>
                     <SelectTrigger className="h-12 rounded-xl bg-surface-container-low border-transparent">
-                      <SelectValue placeholder={`Choose a ${entityName.toLowerCase()}...`} />
+                      <SelectValue placeholder={`Choose a ${entityName.toLowerCase()}...`}>{entities.find((e) => e.id === entityId)?.businessName}</SelectValue>
                     </SelectTrigger>
                     <SelectContent>
                       {entities.map((e) => (

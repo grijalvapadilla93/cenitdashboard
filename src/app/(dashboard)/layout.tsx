@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Sidebar from "@/components/sidebar";
 import { AppProvider, useStore } from "@/lib/store";
 
@@ -31,15 +32,20 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
   return (
     <AppProvider>
       <div className="flex h-screen overflow-hidden bg-background">
-        <Sidebar />
+        <Sidebar mobileOpen={mobileMenuOpen} onMobileClose={() => setMobileMenuOpen(false)} />
         <main className="flex-1 flex flex-col md:ml-64 w-full h-full">
           <header className="bg-surface-container-lowest border-b border-surface-variant w-full top-0 sticky z-10 flex justify-between items-center px-6 md:px-10 py-4">
             <div className="flex items-center gap-4">
-              <button className="md:hidden p-2 rounded-full hover:bg-surface-container-low text-secondary transition-colors cursor-pointer active:scale-95">
-                <span className="material-symbols-outlined">menu</span>
+              <button
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="md:hidden p-2 rounded-full hover:bg-surface-container-low text-secondary transition-colors cursor-pointer active:scale-95"
+              >
+                <span className="material-symbols-outlined">{mobileMenuOpen ? "close" : "menu"}</span>
               </button>
             </div>
             <div className="flex items-center gap-4">
@@ -52,6 +58,12 @@ export default function DashboardLayout({
             {children}
           </div>
         </main>
+        {mobileMenuOpen && (
+          <div
+            className="fixed inset-0 bg-black/40 z-10 md:hidden"
+            onClick={() => setMobileMenuOpen(false)}
+          />
+        )}
       </div>
       <ToastContainer />
     </AppProvider>

@@ -79,7 +79,7 @@ export default function NewClientModal({ open, onOpenChange, onSuccess, leadId }
                   <Label className="text-label-sm font-label-sm text-primary">Select Lead</Label>
                   <Select value={selectedLeadId} onValueChange={(v) => setSelectedLeadId(v || "")}>
                     <SelectTrigger className="h-12 rounded-xl bg-surface-container-low border-transparent">
-                      <SelectValue placeholder="Choose a lead to convert..." />
+                      <SelectValue placeholder="Choose a lead to convert...">{leads.find((l) => l.id === selectedLeadId)?.businessName}</SelectValue>
                     </SelectTrigger>
                     <SelectContent>
                       {leads.map((l) => (

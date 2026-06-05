@@ -83,7 +83,7 @@ export default function NewInvoiceModal({ open, onOpenChange, onSuccess }: Props
                 <Label className="text-label-sm font-label-sm text-primary">Select {entityType === "client" ? "Client" : "Lead"}</Label>
                 <Select value={entityId} onValueChange={(v) => setEntityId(v || "")}>
                   <SelectTrigger className="h-12 rounded-xl bg-surface-container-low border-transparent">
-                    <SelectValue placeholder={`Choose a ${entityType}...`} />
+                    <SelectValue placeholder={`Choose a ${entityType}...`}>{selectedEntity?.businessName}</SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     {(entityType === "client" ? clients : leads).map((e) => (

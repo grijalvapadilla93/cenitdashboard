@@ -200,7 +200,7 @@ export default function NewProposalModal({ open, onOpenChange, onSuccess, leadId
                 <Label className="text-label-sm font-label-sm text-primary">Select Lead</Label>
                 <Select value={selectedLeadId} onValueChange={(v) => setSelectedLeadId(v || "")}>
                   <SelectTrigger className="h-12 rounded-xl bg-surface-container-low border-transparent">
-                    <SelectValue placeholder="Choose a lead..." />
+                    <SelectValue placeholder="Choose a lead...">{leads.find((l) => l.id === selectedLeadId)?.businessName}</SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     {leads.map((l) => (

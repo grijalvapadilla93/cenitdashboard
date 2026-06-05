@@ -76,7 +76,7 @@ export default function SendContractModal({ open, onOpenChange, onSuccess }: Pro
                   <Label className="text-label-sm font-label-sm text-primary">Select Client</Label>
                   <Select value={clientId} onValueChange={(v) => setClientId(v || "")}>
                     <SelectTrigger className="h-12 rounded-xl bg-surface-container-low border-transparent">
-                      <SelectValue placeholder="Choose a client..." />
+                      <SelectValue placeholder="Choose a client...">{clients.find((c) => c.id === clientId)?.businessName}</SelectValue>
                     </SelectTrigger>
                     <SelectContent>
                       {clients.map((c) => (
@@ -90,7 +90,7 @@ export default function SendContractModal({ open, onOpenChange, onSuccess }: Pro
                   <Label className="text-label-sm font-label-sm text-primary">Select Lead to Convert</Label>
                   <Select value={leadId} onValueChange={(v) => setLeadId(v || "")}>
                     <SelectTrigger className="h-12 rounded-xl bg-surface-container-low border-transparent">
-                      <SelectValue placeholder="Choose a lead..." />
+                      <SelectValue placeholder="Choose a lead...">{leads.find((l) => l.id === leadId)?.businessName}</SelectValue>
                     </SelectTrigger>
                     <SelectContent>
                       {leads.filter((l) => l.stage !== "won" && l.stage !== "lost").map((l) => (
